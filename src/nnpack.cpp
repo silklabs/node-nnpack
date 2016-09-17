@@ -64,6 +64,35 @@ static NAN_METHOD(Relu) {
                                                     threadpool)));
 }
 
+static NAN_METHOD(FullyConnected) {
+  uint32_t input_channels = To<uint32_t>(Arg(info, 0)).FromMaybe(0);
+  uint32_t output_channels = To<uint32_t>(Arg(info, 1)).FromMaybe(0);
+  MaybeLocal<Object> input = To<Object>(Arg(info, 2));
+  MaybeLocal<Object> kernel = To<Object>(Arg(info, 3));
+  MaybeLocal<Object> output = To<Object>(Arg(info, 4));
+  if (input.IsEmpty())
+    return ThrowTypeError("missing input array");
+  if (kernel.IsEmpty())
+    return ThrowTypeError("missing kernel array");
+  if (output.IsEmpty())
+    return ThrowTypeError("missing output array");
+  TypedArrayContents<float> input_array(input.ToLocalChecked());
+  TypedArrayContents<float> kernel_array(kernel.ToLocalChecked());
+  TypedArrayContents<float> output_array(output.ToLocalChecked());
+  if (input_array.length() < input_channels)
+    return ThrowTypeError("input array too short");
+  if (kernel_array.length() < input_channels * output_channels)
+    return ThrowTypeError("kernel array too short");
+  if (output_array.length() < output_channels)
+    return ThrowTypeError("output array too short");
+  info.GetReturnValue().Set(int32_t(nnp_fully_connected_inference(input_channels,
+                                                                  output_channels,
+                                                                  *input_array,
+                                                                  *kernel_array,
+                                                                  *output_array,
+                                                                  threadpool)));
+}
+
 void Exit(void *) {
   nnp_deinitialize();
   if (threadpool)
@@ -76,6 +105,7 @@ void Init(Handle<Object> exports) {
   threadpool = pthreadpool_create(0);
   nnp_initialize();
   exports->Set(New("relu").ToLocalChecked(), New<FunctionTemplate>(Relu)->GetFunction());
+  exports->Set(New("fullyConnected").ToLocalChecked(), New<FunctionTemplate>(FullyConnected)->GetFunction());
 }
 
 NODE_MODULE(NNPACK, Init);
