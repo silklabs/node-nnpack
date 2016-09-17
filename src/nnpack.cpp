@@ -174,8 +174,8 @@ static NAN_METHOD(Convolution) {
     return ThrowTypeError("kernel array too short");
   if (bias_array.length() < output_channels)
     return ThrowTypeError("bias array too short");
-  uint32_t out_width = (input_size.width + padding.left + padding.right - kernel_size.width + 1) / kernel_stride.width + 1;
-  uint32_t out_height = (input_size.height + padding.top + padding.bottom - kernel_size.height + 1) / kernel_stride.height + 1;
+  uint32_t out_width = (input_size.width + padding.left + padding.right - kernel_size.width) / kernel_stride.width + 1;
+  uint32_t out_height = (input_size.height + padding.top + padding.bottom - kernel_size.height) / kernel_stride.height + 1;
   if (output_array.length() < output_channels * out_width * out_height)
     return ThrowTypeError("output array too short");
   info.GetReturnValue().Set(int32_t(nnp_convolution_inference(nnp_convolution_algorithm_auto,
