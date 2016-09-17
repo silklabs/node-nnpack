@@ -93,6 +93,48 @@ static NAN_METHOD(FullyConnected) {
                                                                   threadpool)));
 }
 
+static NAN_METHOD(MaxPooling) {
+  nnp_size input_size;
+  nnp_padding padding;
+  nnp_size kernel_size;
+  nnp_size kernel_stride;
+  uint32_t batch_size = To<uint32_t>(Arg(info, 0)).FromMaybe(0);
+  uint32_t channels = To<uint32_t>(Arg(info, 1)).FromMaybe(0);
+  input_size.width = To<uint32_t>(Arg(info, 2)).FromMaybe(0);
+  input_size.height = To<uint32_t>(Arg(info, 3)).FromMaybe(0);
+  padding.top = To<uint32_t>(Arg(info, 4)).FromMaybe(0);
+  padding.right = To<uint32_t>(Arg(info, 5)).FromMaybe(0);
+  padding.bottom = To<uint32_t>(Arg(info, 6)).FromMaybe(0);
+  padding.left = To<uint32_t>(Arg(info, 7)).FromMaybe(0);
+  kernel_size.width = To<uint32_t>(Arg(info, 8)).FromMaybe(0);
+  kernel_size.height = To<uint32_t>(Arg(info, 9)).FromMaybe(0);
+  kernel_stride.width = To<uint32_t>(Arg(info, 10)).FromMaybe(0);
+  kernel_stride.height = To<uint32_t>(Arg(info, 11)).FromMaybe(0);
+  MaybeLocal<Object> input = To<Object>(Arg(info, 12));
+  MaybeLocal<Object> output = To<Object>(Arg(info, 13));
+  if (input.IsEmpty())
+    return ThrowTypeError("missing input array");
+  if (output.IsEmpty())
+    return ThrowTypeError("missing output array");
+  TypedArrayContents<float> input_array(input.ToLocalChecked());
+  TypedArrayContents<float> output_array(output.ToLocalChecked());
+  if (input_array.length() < batch_size * channels * input_size.width * input_size.height)
+    return ThrowTypeError("input array too short");
+  uint32_t out_width = (input_size.width + padding.left + padding.right - kernel_size.width + 1) / kernel_stride.width + 1;
+  uint32_t out_height = (input_size.height + padding.top + padding.bottom - kernel_size.height + 1) / kernel_stride.height + 1;
+  if (output_array.length() < batch_size * channels * out_width * out_height)
+    return ThrowTypeError("output array too short");
+  info.GetReturnValue().Set(int32_t(nnp_max_pooling_output(batch_size,
+                                                           channels,
+                                                           input_size,
+                                                           padding,
+                                                           kernel_size,
+                                                           kernel_stride,
+                                                           *input_array,
+                                                           *output_array,
+                                                           threadpool)));
+}
+
 void Exit(void *) {
   nnp_deinitialize();
   if (threadpool)
@@ -106,6 +148,7 @@ void Init(Handle<Object> exports) {
   nnp_initialize();
   exports->Set(New("relu").ToLocalChecked(), New<FunctionTemplate>(Relu)->GetFunction());
   exports->Set(New("fullyConnected").ToLocalChecked(), New<FunctionTemplate>(FullyConnected)->GetFunction());
+  exports->Set(New("maxPooling").ToLocalChecked(), New<FunctionTemplate>(MaxPooling)->GetFunction());
 }
 
 NODE_MODULE(NNPACK, Init);
