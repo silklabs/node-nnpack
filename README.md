@@ -12,44 +12,44 @@ All data is expected to be passed as Float32Array.
 
     convolution(input_channels,
                 output_channels,
-		input_width,
-		input_height,
-		padding_top,
-		padding_right,
-		padding_bottom,
-		padding_left,
-		kernel_width,
-		kernel_height,
-		stride_width,
-		stride_height,
-		input,
-		kernel,
-		bias, // can be null
-		output);
+                input_width,
+                input_height,
+                padding_top,
+                padding_right,
+                padding_bottom,
+                padding_left,
+                kernel_width,
+                kernel_height,
+                stride_width,
+                stride_height,
+                input,
+                kernel,
+                bias, // can be null
+                output);
 
     fullyConnected(input_channels,
                    output_channels,
-		   input,
-		   kernel,
-		   output);
+                   input,
+                   kernel,
+                   output);
 
     relu(batch_size,
          channels,
-	 input,
-	 output,
-	 negative_slope);
+         input,
+         output,
+         negative_slope);
 
     maxPooling(batch_size,
                channels,
-	       input_width,
-	       input_height,
-	       padding_top,
-	       padding_right,
-	       padding_bottom,
-	       padding_left,
-	       kernel_width,
-	       kernel_height,
-	       stride_width,
-	       stride_height,
-	       input,
-	       output);
+               input_width,
+               input_height,
+               padding_top,
+               padding_right,
+               padding_bottom,
+               padding_left,
+               kernel_width,
+               kernel_height,
+               stride_width,
+               stride_height,
+               input,
+               output);
