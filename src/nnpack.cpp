@@ -135,6 +135,65 @@ static NAN_METHOD(MaxPooling) {
                                                            threadpool)));
 }
 
+static NAN_METHOD(Convolution) {
+  nnp_size input_size;
+  nnp_padding padding;
+  nnp_size kernel_size;
+  nnp_size kernel_stride;
+  size_t input_channels = To<uint32_t>(Arg(info, 0)).FromMaybe(0);
+  size_t output_channels = To<uint32_t>(Arg(info, 1)).FromMaybe(0);
+  input_size.width = To<uint32_t>(Arg(info, 2)).FromMaybe(0);
+  input_size.height = To<uint32_t>(Arg(info, 3)).FromMaybe(0);
+  padding.top = To<uint32_t>(Arg(info, 4)).FromMaybe(0);
+  padding.right = To<uint32_t>(Arg(info, 5)).FromMaybe(0);
+  padding.bottom = To<uint32_t>(Arg(info, 6)).FromMaybe(0);
+  padding.left = To<uint32_t>(Arg(info, 7)).FromMaybe(0);
+  kernel_size.width = To<uint32_t>(Arg(info, 8)).FromMaybe(0);
+  kernel_size.height = To<uint32_t>(Arg(info, 9)).FromMaybe(0);
+  kernel_stride.width = To<uint32_t>(Arg(info, 10)).FromMaybe(0);
+  kernel_stride.height = To<uint32_t>(Arg(info, 11)).FromMaybe(0);
+  MaybeLocal<Object> input = To<Object>(Arg(info, 12));
+  MaybeLocal<Object> kernel = To<Object>(Arg(info, 13));
+  MaybeLocal<Object> bias = To<Object>(Arg(info, 14));
+  MaybeLocal<Object> output = To<Object>(Arg(info, 14));
+  if (input.IsEmpty())
+    return ThrowTypeError("missing input array");
+  if (kernel.IsEmpty())
+    return ThrowTypeError("missing kernel array");
+  if (bias.IsEmpty())
+    return ThrowTypeError("missing bias array");
+  if (output.IsEmpty())
+    return ThrowTypeError("missing output array");
+  TypedArrayContents<float> input_array(input.ToLocalChecked());
+  TypedArrayContents<float> kernel_array(kernel.ToLocalChecked());
+  TypedArrayContents<float> bias_array(bias.ToLocalChecked());
+  TypedArrayContents<float> output_array(output.ToLocalChecked());
+  if (input_array.length() < input_channels * input_size.width * input_size.height)
+    return ThrowTypeError("input array too short");
+  if (kernel_array.length() < output_channels * kernel_size.width * kernel_size.height)
+    return ThrowTypeError("kernel array too short");
+  if (bias_array.length() < output_channels)
+    return ThrowTypeError("bias array too short");
+  uint32_t out_width = (input_size.width + padding.left + padding.right - kernel_size.width + 1) / kernel_stride.width + 1;
+  uint32_t out_height = (input_size.height + padding.top + padding.bottom - kernel_size.height + 1) / kernel_stride.height + 1;
+  if (output_array.length() < output_channels * out_width * out_height)
+    return ThrowTypeError("output array too short");
+  info.GetReturnValue().Set(int32_t(nnp_convolution_inference(nnp_convolution_algorithm_auto,
+                                                              nnp_convolution_transform_strategy_tuple_based,
+                                                              input_channels,
+                                                              output_channels,
+                                                              input_size,
+                                                              padding,
+                                                              kernel_size,
+                                                              kernel_stride,
+                                                              *input_array,
+                                                              *kernel_array,
+                                                              *bias_array,
+                                                              *output_array,
+                                                              threadpool,
+                                                              nullptr)));
+}
+
 void Exit(void *) {
   nnp_deinitialize();
   if (threadpool)
@@ -149,6 +208,7 @@ void Init(Handle<Object> exports) {
   exports->Set(New("relu").ToLocalChecked(), New<FunctionTemplate>(Relu)->GetFunction());
   exports->Set(New("fullyConnected").ToLocalChecked(), New<FunctionTemplate>(FullyConnected)->GetFunction());
   exports->Set(New("maxPooling").ToLocalChecked(), New<FunctionTemplate>(MaxPooling)->GetFunction());
+  exports->Set(New("convolution").ToLocalChecked(), New<FunctionTemplate>(Convolution)->GetFunction());
 }
 
 NODE_MODULE(NNPACK, Init);
