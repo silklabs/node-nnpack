@@ -194,6 +194,10 @@ static NAN_METHOD(Convolution) {
                                                               nullptr)));
 }
 
+static NAN_GETTER(GetThreads) {
+  info.GetReturnValue().Set(uint32_t(pthreadpool_get_threads_count(threadpool)));
+}
+
 void Exit(void *) {
   nnp_deinitialize();
   if (threadpool)
@@ -205,6 +209,7 @@ void Init(Handle<Object> exports) {
   // create a thread pool to be used by this module
   threadpool = pthreadpool_create(0);
   nnp_initialize();
+  SetAccessor(exports, New("threads").ToLocalChecked(), GetThreads);
   exports->Set(New("relu").ToLocalChecked(), New<FunctionTemplate>(Relu)->GetFunction());
   exports->Set(New("fullyConnected").ToLocalChecked(), New<FunctionTemplate>(FullyConnected)->GetFunction());
   exports->Set(New("maxPooling").ToLocalChecked(), New<FunctionTemplate>(MaxPooling)->GetFunction());
