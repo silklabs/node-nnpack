@@ -155,7 +155,7 @@ static NAN_METHOD(Convolution) {
   MaybeLocal<Object> input = To<Object>(Arg(info, 12));
   MaybeLocal<Object> kernel = To<Object>(Arg(info, 13));
   MaybeLocal<Object> bias = To<Object>(Arg(info, 14));
-  MaybeLocal<Object> output = To<Object>(Arg(info, 14));
+  MaybeLocal<Object> output = To<Object>(Arg(info, 15));
   if (input.IsEmpty())
     return ThrowTypeError("missing input array");
   if (kernel.IsEmpty())
