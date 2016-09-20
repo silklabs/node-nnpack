@@ -10,10 +10,6 @@
         '<!(echo $NNPACK_ROOT/include)',
         '<!(echo $NNPACK_ROOT/third-party/pthreadpool/include)'
       ],
-      'libraries': [
-        '-L<!(echo "$NNPACK_ROOT/lib")',
-        '-lnnpack'
-      ],
       'ldflags': [
       ],
       'cflags_cc': [
@@ -25,6 +21,15 @@
       'dependencies': [
       ],
       'conditions': [
+        [ 'OS==\"android\"', {
+          'include_dirs': [
+            '<!(echo \" -I $ANDROID_BUILD_TOP/external/NNPACK/include \")',
+            '<!(echo \" -I $ANDROID_BUILD_TOP/external/pthreadpool/include \")',
+          ],
+          'libraries': [
+            '<!(echo $Android_mk__LIBRARIES)',
+          ],
+        }],
         ['OS=="win"', {
           'dependencies': [
           ]
@@ -34,8 +39,10 @@
           ],
 	  'include_dirs': [
 	  ],
-	  'libraries': [
-	  ],
+          'libraries': [
+            '-L<!(echo "$NNPACK_ROOT/lib")',
+            '-lnnpack'
+          ],
           'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
             'MACOSX_DEPLOYMENT_TARGET': '10.11',
