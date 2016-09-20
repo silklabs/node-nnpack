@@ -2,7 +2,7 @@
   "name": "node-nnpack",
   "version": "0.0.1",
   "description": "Node bindings for NNPACK",
-  "main": "./src/index.js",
+  "main": "build/Release/nnpack.node",
   "scripts": {
     "install": "node-gyp configure && node-gyp rebuild"
   },
