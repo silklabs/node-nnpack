@@ -1,6 +1,3 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
-
 /**
  * Copyright (c) 2016 Silk Labs, Inc.
  * See LICENSE.
@@ -34,8 +31,9 @@ static pthreadpool_t threadpool;
 
 // Get an argument
 static Local<Value> Arg(const FunctionCallbackInfo<Value>& info, int n) {
-  if (n < info.Length())
+  if (n < info.Length()) {
     return info[n];
+  }
   return Undefined();
 }
 
@@ -45,16 +43,20 @@ static NAN_METHOD(Relu) {
   MaybeLocal<Object> input = To<Object>(Arg(info, 2));
   MaybeLocal<Object> output = To<Object>(Arg(info, 3));
   double negative_slope = To<double>(Arg(info, 4)).FromMaybe(0);
-  if (input.IsEmpty())
+  if (input.IsEmpty()) {
     return ThrowTypeError("missing input array");
-  if (output.IsEmpty())
+  }
+  if (output.IsEmpty()) {
     return ThrowTypeError("missing output array");
+  }
   TypedArrayContents<float> input_array(input.ToLocalChecked());
   TypedArrayContents<float> output_array(output.ToLocalChecked());
-  if (input_array.length() < batch_size * channels)
+  if (input_array.length() < batch_size * channels) {
     return ThrowTypeError("input array too short");
-  if (output_array.length() < batch_size * channels)
+  }
+  if (output_array.length() < batch_size * channels) {
     return ThrowTypeError("output array too short");
+  }
   info.GetReturnValue().Set(int32_t(nnp_relu_output(batch_size,
                                                     channels,
                                                     *input_array,
@@ -69,21 +71,27 @@ static NAN_METHOD(FullyConnected) {
   MaybeLocal<Object> input = To<Object>(Arg(info, 2));
   MaybeLocal<Object> kernel = To<Object>(Arg(info, 3));
   MaybeLocal<Object> output = To<Object>(Arg(info, 4));
-  if (input.IsEmpty())
+  if (input.IsEmpty()) {
     return ThrowTypeError("missing input array");
-  if (kernel.IsEmpty())
+  }
+  if (kernel.IsEmpty()) {
     return ThrowTypeError("missing kernel array");
-  if (output.IsEmpty())
+  }
+  if (output.IsEmpty()) {
     return ThrowTypeError("missing output array");
+  }
   TypedArrayContents<float> input_array(input.ToLocalChecked());
   TypedArrayContents<float> kernel_array(kernel.ToLocalChecked());
   TypedArrayContents<float> output_array(output.ToLocalChecked());
-  if (input_array.length() < input_channels)
+  if (input_array.length() < input_channels) {
     return ThrowTypeError("input array too short");
-  if (kernel_array.length() < input_channels * output_channels)
+  }
+  if (kernel_array.length() < input_channels * output_channels) {
     return ThrowTypeError("kernel array too short");
-  if (output_array.length() < output_channels)
+  }
+  if (output_array.length() < output_channels) {
     return ThrowTypeError("output array too short");
+  }
   info.GetReturnValue().Set(int32_t(nnp_fully_connected_inference(input_channels,
                                                                   output_channels,
                                                                   *input_array,
@@ -111,18 +119,22 @@ static NAN_METHOD(MaxPooling) {
   kernel_stride.height = To<uint32_t>(Arg(info, 11)).FromMaybe(0);
   MaybeLocal<Object> input = To<Object>(Arg(info, 12));
   MaybeLocal<Object> output = To<Object>(Arg(info, 13));
-  if (input.IsEmpty())
+  if (input.IsEmpty()) {
     return ThrowTypeError("missing input array");
-  if (output.IsEmpty())
+  }
+  if (output.IsEmpty()) {
     return ThrowTypeError("missing output array");
+  }
   TypedArrayContents<float> input_array(input.ToLocalChecked());
   TypedArrayContents<float> output_array(output.ToLocalChecked());
-  if (input_array.length() < batch_size * channels * input_size.width * input_size.height)
+  if (input_array.length() < batch_size * channels * input_size.width * input_size.height) {
     return ThrowTypeError("input array too short");
+  }
   uint32_t out_width = (input_size.width + padding.left + padding.right - kernel_size.width + 1) / kernel_stride.width + 1;
   uint32_t out_height = (input_size.height + padding.top + padding.bottom - kernel_size.height + 1) / kernel_stride.height + 1;
-  if (output_array.length() < batch_size * channels * out_width * out_height)
+  if (output_array.length() < batch_size * channels * out_width * out_height) {
     return ThrowTypeError("output array too short");
+  }
   info.GetReturnValue().Set(int32_t(nnp_max_pooling_output(batch_size,
                                                            channels,
                                                            input_size,
@@ -155,28 +167,36 @@ static NAN_METHOD(Convolution) {
   MaybeLocal<Object> kernel = To<Object>(Arg(info, 13));
   MaybeLocal<Object> bias = To<Object>(Arg(info, 14));
   MaybeLocal<Object> output = To<Object>(Arg(info, 15));
-  if (input.IsEmpty())
+  if (input.IsEmpty()) {
     return ThrowTypeError("missing input array");
-  if (kernel.IsEmpty())
+  }
+  if (kernel.IsEmpty()) {
     return ThrowTypeError("missing kernel array");
-  if (bias.IsEmpty())
+  }
+  if (bias.IsEmpty()) {
     return ThrowTypeError("missing bias array");
-  if (output.IsEmpty())
+  }
+  if (output.IsEmpty()) {
     return ThrowTypeError("missing output array");
+  }
   TypedArrayContents<float> input_array(input.ToLocalChecked());
   TypedArrayContents<float> kernel_array(kernel.ToLocalChecked());
   TypedArrayContents<float> bias_array(bias.ToLocalChecked());
   TypedArrayContents<float> output_array(output.ToLocalChecked());
-  if (input_array.length() < input_channels * input_size.width * input_size.height)
+  if (input_array.length() < input_channels * input_size.width * input_size.height) {
     return ThrowTypeError("input array too short");
-  if (kernel_array.length() < output_channels * kernel_size.width * kernel_size.height)
+  }
+  if (kernel_array.length() < output_channels * kernel_size.width * kernel_size.height) {
     return ThrowTypeError("kernel array too short");
-  if (bias_array.length() < output_channels)
+  }
+  if (bias_array.length() < output_channels) {
     return ThrowTypeError("bias array too short");
+  }
   uint32_t out_width = (input_size.width + padding.left + padding.right - kernel_size.width) / kernel_stride.width + 1;
   uint32_t out_height = (input_size.height + padding.top + padding.bottom - kernel_size.height) / kernel_stride.height + 1;
-  if (output_array.length() < output_channels * out_width * out_height)
+  if (output_array.length() < output_channels * out_width * out_height) {
     return ThrowTypeError("output array too short");
+  }
   info.GetReturnValue().Set(int32_t(nnp_convolution_inference(nnp_convolution_algorithm_auto,
                                                               nnp_convolution_transform_strategy_tuple_based,
                                                               input_channels,
@@ -199,8 +219,9 @@ static NAN_GETTER(GetThreads) {
 
 void Exit(void *) {
   nnp_deinitialize();
-  if (threadpool)
+  if (threadpool) {
     pthreadpool_destroy(threadpool);
+  }
 }
 
 void Init(Handle<Object> exports) {

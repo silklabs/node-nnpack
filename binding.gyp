@@ -12,7 +12,7 @@
       ],
       'libraries': [
         '-L<!(echo "$NNPACK_ROOT/lib")',
-	'-lnnpack'
+        '-lnnpack'
       ],
       'ldflags': [
       ],
@@ -30,7 +30,7 @@
           ]
         }],
         ['OS=="mac"', {
-	  'defines': [
+          'defines': [
           ],
 	  'include_dirs': [
 	  ],
