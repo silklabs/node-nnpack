@@ -38,10 +38,12 @@
           'defines': [
           ],
 	  'include_dirs': [
+	    '<!(echo $NNPACK_ROOT/include)',
+            '<!(echo $NNPACK_ROOT/third-party/pthreadpool/include)'
 	  ],
           'libraries': [
             '-L<!(echo "$NNPACK_ROOT/lib")',
-            '-lnnpack'
+            '-lnnpack -pthreadpool'
           ],
           'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
