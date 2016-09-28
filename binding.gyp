@@ -41,14 +41,13 @@
 	    '<!(echo $NNPACK_ROOT/include)',
             '<!(echo $NNPACK_ROOT/third-party/pthreadpool/include)'
 	  ],
-          'libraries': [
-            '-L<!(echo "$NNPACK_ROOT/lib")',
-            '-lnnpack -pthreadpool'
-          ],
           'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
             'MACOSX_DEPLOYMENT_TARGET': '10.11',
             'OTHER_LDFLAGS': [
+              '-L<!(echo "$NNPACK_ROOT/lib")',
+              '-lnnpack',
+	      '<!(echo "$NNPACK_ROOT/third-party/pthreadpool/lib/pthreadpool.c.o")'
             ],
             'OTHER_CFLAGS': [
             ]
